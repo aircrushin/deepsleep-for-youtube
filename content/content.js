@@ -108,6 +108,11 @@ class DeepSleepAudio {
       // Create AudioContext
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
       
+      // Resume context if suspended (autoplay policy)
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+      
       // Create source from video element
       this.sourceNode = this.audioContext.createMediaElementSource(this.videoElement);
       
@@ -134,13 +139,15 @@ class DeepSleepAudio {
       this.gainNode.connect(this.volumeGainNode);
       this.volumeGainNode.connect(this.audioContext.destination);
       
-      // Apply current settings
-      this.applySettings();
+      // Mark as processing BEFORE applying settings
+      this.isProcessing = true;
+      
+      // Apply current settings to nodes
+      this.applyAudioParams();
       
       // Monitor for spikes
       this.monitorSpikes();
       
-      this.isProcessing = true;
       console.log('DeepSleep: Audio processing attached');
       
       this.injectMoonIcon();
@@ -187,12 +194,17 @@ class DeepSleepAudio {
     if (this.isProcessing || !this.sourceNode || !this.audioContext) return;
     
     try {
+      // Resume context if suspended
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+      
       // Reconnect through processing chain
       this.sourceNode.disconnect();
       this.sourceNode.connect(this.compressorNode);
       
       this.isProcessing = true;
-      this.applySettings();
+      this.applyAudioParams();
       this.injectMoonIcon();
       
       console.log('DeepSleep: Audio processing reattached');
@@ -230,27 +242,31 @@ class DeepSleepAudio {
     this.pinkNoiseNode = scriptProcessor;
   }
   
-  applySettings() {
-    if (!this.audioContext) return;
+  applyAudioParams() {
+    if (!this.audioContext || !this.isProcessing) return;
     
     const currentTime = this.audioContext.currentTime;
     
     // Safety/Compression settings (0-100 -> threshold -50 to -10 dB)
-    const threshold = -50 + (this.settings.safety * 0.4); // -50 to -10
-    const ratio = 4 + (this.settings.safety * 0.16); // 4:1 to 20:1
-    const attack = 0.001 + (0.004 * (100 - this.settings.safety) / 100); // 1ms to 5ms
-    const release = 0.05 + (0.2 * (100 - this.settings.safety) / 100); // 50ms to 250ms
-    
-    this.compressorNode.threshold.setValueAtTime(threshold, currentTime);
-    this.compressorNode.ratio.setValueAtTime(ratio, currentTime);
-    this.compressorNode.attack.setValueAtTime(attack, currentTime);
-    this.compressorNode.release.setValueAtTime(release, currentTime);
-    this.compressorNode.knee.setValueAtTime(10, currentTime);
+    if (this.compressorNode) {
+      const threshold = -50 + (this.settings.safety * 0.4); // -50 to -10
+      const ratio = 4 + (this.settings.safety * 0.16); // 4:1 to 20:1
+      const attack = 0.001 + (0.004 * (100 - this.settings.safety) / 100); // 1ms to 5ms
+      const release = 0.05 + (0.2 * (100 - this.settings.safety) / 100); // 50ms to 250ms
+      
+      this.compressorNode.threshold.setValueAtTime(threshold, currentTime);
+      this.compressorNode.ratio.setValueAtTime(ratio, currentTime);
+      this.compressorNode.attack.setValueAtTime(attack, currentTime);
+      this.compressorNode.release.setValueAtTime(release, currentTime);
+      this.compressorNode.knee.setValueAtTime(10, currentTime);
+    }
     
     // Warmth/LowPass settings (0-100 -> 8000Hz to 2000Hz)
-    const frequency = 8000 - (this.settings.warmth * 60); // 8000Hz to 2000Hz
-    this.lowpassFilter.frequency.setValueAtTime(frequency, currentTime);
-    this.lowpassFilter.Q.setValueAtTime(0.7, currentTime);
+    if (this.lowpassFilter) {
+      const frequency = 8000 - (this.settings.warmth * 60); // 8000Hz to 2000Hz
+      this.lowpassFilter.frequency.setValueAtTime(frequency, currentTime);
+      this.lowpassFilter.Q.setValueAtTime(0.7, currentTime);
+    }
     
     // Speed/Playback rate
     if (this.videoElement) {
@@ -269,16 +285,28 @@ class DeepSleepAudio {
       this.volumeGainNode.gain.setValueAtTime(linearGain, currentTime);
     }
     
-    // Handle enable/disable
+    console.log('DeepSleep: Applied settings', {
+      safety: this.settings.safety,
+      warmth: this.settings.warmth,
+      speed: this.settings.speed,
+      volumeDb: this.settings.volumeDb
+    });
+  }
+  
+  applySettings() {
+    // Handle enable/disable state changes
     if (this.settings.enabled && !this.isProcessing) {
       // Try reattach first (if nodes exist), otherwise full attach
-      if (this.sourceNode && this.compressorNode) {
+      if (this.sourceNode && this.compressorNode && this.audioContext) {
         this.reattachAudioProcessing();
       } else {
         this.attachAudioProcessing();
       }
     } else if (!this.settings.enabled && this.isProcessing) {
       this.detachAudioProcessing();
+    } else if (this.settings.enabled && this.isProcessing) {
+      // Already processing, just update params
+      this.applyAudioParams();
     }
   }
   
