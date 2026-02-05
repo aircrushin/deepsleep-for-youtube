@@ -4,7 +4,7 @@ This document provides essential context for AI agents working on the DeepSleep 
 
 ## Project Overview
 
-DeepSleep Tube is a Chrome extension that provides AI-enhanced audio filtering for YouTube videos, designed for comfortable sleep listening. It uses the Web Audio API to process audio in real-time with features like dynamic range compression, warmth filtering, playback speed control, and ad muting.
+DeepSleep Tube is a Chrome extension that provides AI-enhanced audio filtering for YouTube videos, designed for comfortable sleep listening. It uses the Web Audio API to process audio in real-time with features like dynamic range compression, warmth filtering, playback speed control, ad muting, pink noise comfort sounds, custom user presets, and spike suppression statistics.
 
 ## Architecture
 
@@ -74,6 +74,10 @@ AudioDestinationNode
 - `chrome.tabs.sendMessage()`: Popup → Content script communication
 - `chrome.runtime.onMessage`: Content script message listener
 
+**Message Types:**
+- `SETTINGS_UPDATE`: Popup → Content (apply new audio settings)
+- `GET_STATS`: Popup → Content (request spike suppression count)
+
 ### Settings Schema
 
 ```javascript
@@ -118,8 +122,10 @@ Uses DOM observation for YouTube's ad indicators:
 
 ### State Management
 - Settings stored in `chrome.storage.local` with key `deepsleepSettings`
+- Custom presets stored separately with key `deepsleepCustomPresets`
 - Content script observes settings via message listener
 - Popup sends `SETTINGS_UPDATE` message on any change
+- Manual slider adjustment clears the active preset (`settings.preset = null`)
 
 ### YouTube Integration
 - Target video: `video.html5-main-video`
@@ -178,13 +184,17 @@ Users can also create custom presets via the popup UI, which are stored in `chro
 |----------|----------|---------|
 | `attachAudioProcessing()` | [content.js:104](content/content.js#L104) | Initialize audio graph |
 | `applyAudioParams()` | [content.js:245](content/content.js#L245) | Apply settings to nodes |
-| `saveSettings()` | [popup.js:49](popup/popup.js#L49) | Persist to chrome.storage |
-| `sendSettingsToContent()` | [popup.js:55](popup/popup.js#L55) | Message content script |
+| `saveSettings()` | [popup.js:58](popup/popup.js#L58) | Persist to chrome.storage |
+| `sendSettingsToContent()` | [popup.js:64](popup/popup.js#L64) | Message content script |
+| `applyPreset()` | [popup.js:121](popup/popup.js#L121) | Apply preset (built-in or custom) |
+| `saveCustomPreset()` | [popup.js:135](popup/popup.js#L135) | Create user-defined preset |
+| `deleteCustomPreset()` | [popup.js:149](popup/popup.js#L149) | Remove custom preset |
+| `requestStats()` | [popup.js:256](popup/popup.js#L256) | Query spike suppression stats |
 | `observeAds()` | [content.js:87](content/content.js#L87) | Detect and mute ads |
 
 ## Known Limitations
 
-- ScriptProcessor is deprecated (should migrate to AudioWorklet)
 - Content script re-injection on page navigation
 - AudioContext autoplay policy requires user gesture
 - Only works on youtube.com (not YouTube embeds)
+- Custom presets are stored locally and not synced across devices

@@ -1,82 +1,93 @@
 # DeepSleep Tube 🌙
 
-An AI-enhanced auditory filter Chrome extension for YouTube, ensuring warm, interruption-free listening for sleep.
+一款专为 YouTube 设计的 AI 增强音频过滤 Chrome 扩展，让你在温暖、无干扰的声音中安然入睡。
 
-## Features
+## ✨ 功能特点
 
-- **Smart Dynamic Range Compression (DRC)** - Suppresses sudden audio spikes (laughter, applause, loud transitions) within 5ms
-- **Warmth Filter** - Low-pass filter attenuates harsh high frequencies, making voices sound "velvety"
-- **Loudness Normalization** - Consistent volume across all videos
-- **Pitch-Constant Speed Control** - Slow down speech (0.7x-1.0x) without audio distortion
-- **Smart Fade-out** - 2-minute gradual volume decrease when sleep timer expires
-- **Ad Muting** - Automatically reduces volume during YouTube ads
-- **Comfort Noise** - Optional pink noise during silent gaps
+- **智能动态压缩** - 在 5ms 内抑制突然的音频峰值（笑声、掌声、大声转场）
+- **暖音滤波器** - 低通滤波器衰减刺耳的高频，让声音更加柔和
+- **音量标准化** - 所有视频保持一致的音量
+- **变速不变调** - 减慢语速（0.7x-1.0x）而不产生音频失真
+- **智能淡出** - 睡眠计时器到期时，音量在 2 分钟内逐渐降低
+- **广告静音** - 自动降低 YouTube 广告的音量
+- **舒适噪音** - 可选的粉红噪音填充静音间隙
 
-## Installation
+## 📥 安装教程
 
-1. Clone/download this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" (top right toggle)
-4. Click "Load unpacked"
-5. Select the `deepsleep-chrome` folder
-6. **Add icons**: Replace placeholder icons in the `/icons` folder with 16x16, 48x48, and 128x128 PNG icons
+### 第一步：下载插件
 
-## Usage
+**方法一：直接下载 ZIP**
 
-1. Navigate to any YouTube video
-2. Click the DeepSleep Tube extension icon
-3. Toggle "Sleep Mode" on
-4. Choose a preset or customize:
-   - **Safety**: How aggressively to suppress loud noises
-   - **Warmth**: How much to soften high frequencies
-   - **Speed**: Playback rate (0.7x - 1.0x)
-5. Set a sleep timer if desired
+1. 访问 [GitHub 仓库](https://github.com/aircrushin/deepsleep-for-youtube)
+2. 点击绿色的 **"Code"** 按钮
+3. 选择 **"Download ZIP"**
+4. 解压下载的 ZIP 文件到任意文件夹
 
-## Presets
+**方法二：使用 Git 克隆**
 
-### Built-in Presets
-
-| Preset | Safety | Warmth | Speed |
-|--------|--------|--------|-------|
-| Deep Sleep | 90% | 85% | 0.90x |
-| Zen | 80% | 72% | 0.95x |
-| Relax | 70% | 60% | 1.00x |
-
-### Custom Presets
-
-You can save your own presets:
-1. Adjust the sliders to your preferred settings
-2. Click **"+ Save Current"** in the Custom Presets section
-3. Enter a name for your preset
-4. Your preset will be saved and available across sessions
-
-To delete a custom preset, click the **×** button next to it.
-
-## Technical Details
-
-### Audio Processing Chain
-
-```
-MediaElementAudioSourceNode (Video)
-  → DynamicsCompressorNode (Spike limiting)
-  → BiquadFilterNode (Low-pass warmth)
-  → GainNode (Volume/Fade)
-  → AudioDestinationNode (Speakers)
+```bash
+git clone https://github.com/aircrushin/deepsleep-for-youtube.git
 ```
 
-### Performance
+### 第二步：安装到 Chrome
 
-- Processing latency: <20ms
-- Minimal CPU overhead
-- OLED-friendly dark UI
+1. 打开 Chrome 浏览器
+2. 在地址栏输入 `chrome://extensions/` 并回车
+3. 打开右上角的 **"开发者模式"** 开关
+4. 点击左上角的 **"加载已解压的扩展程序"** 按钮
+5. 选择你刚才解压的文件夹（包含 `manifest.json` 的那个文件夹）
+6. 完成！你会在 Chrome 工具栏看到 🌙 图标
 
-## Icons Required
+## 🎮 使用方法
 
-Create PNG icons and place in `/icons`:
-- `icon16.png` (16x16)
-- `icon48.png` (48x48)
-- `icon128.png` (128x128)
+1. 打开任意 YouTube 视频
+2. 点击 Chrome 工具栏中的 **DeepSleep Tube** 图标 🌙
+3. 打开 **"Sleep Mode"** 开关
+4. 选择一个预设，或手动调节：
+   - **Safety（安全）**：抑制噪音的力度
+   - **Warmth（暖音）**：软化高频的程度
+   - **Speed（速度）**：播放速率（0.7x - 1.0x）
+   - **Volume（音量）**：输出音量（-30dB 到 +6dB）
+5. 可选：设置睡眠计时器
 
-## License
+## 🎛️ 预设说明
 
-MIT
+### 内置预设
+
+| 预设          | 安全度 | 暖音度 | 速度  | 适用场景                     |
+| ------------- | ------ | ------ | ----- | ---------------------------- |
+| 😴 Deep Sleep | 90%    | 85%    | 0.90x | 深度睡眠，最大程度过滤刺激音 |
+| 🍃 Zen        | 80%    | 72%    | 0.95x | 冥想/放松，平衡模式          |
+| 🧘 Relax      | 70%    | 60%    | 1.00x | 轻度放松，接近原声           |
+
+### 自定义预设
+
+你可以保存自己的设置：
+
+1. 调整滑块到你喜欢的设置
+2. 点击 **"+ Save Current"** 按钮
+3. 输入预设名称
+4. 预设会自动保存，下次打开仍然可用
+
+要删除自定义预设，点击预设旁边的 **×** 按钮。
+
+## ⏰ 睡眠计时器
+
+- **Off** - 关闭计时器
+- **15m / 30m / 1h / 2h** - 设定时间后自动淡出并暂停视频
+
+## 🔧 其他功能
+
+- **Mute Ads（广告静音）**：自动检测并静音 YouTube 广告
+- **Comfort Noise（舒适噪音）**：在静音时播放轻柔的粉红噪音
+
+## ❓ 常见问题
+
+**Q: 为什么点击图标没有反应？**
+A: 请确保你在 YouTube 网站上。此插件仅在 youtube.com 上生效。
+
+**Q: 为什么声音没有变化？**
+A: 请确保 "Sleep Mode" 开关已打开（显示为紫色）。
+
+**Q: 如何更新插件？**
+A: 重新下载最新版本，然后在 `chrome://extensions/` 页面点击插件的刷新按钮。
