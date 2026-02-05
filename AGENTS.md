@@ -17,7 +17,8 @@ deepsleep-chrome/
 │   └── background.js      # Service worker (minimal usage)
 ├── content/
 │   ├── content.js         # Main audio processing logic
-│   └── content.css        # Injected styles (moon button, tooltip)
+│   ├── content.css        # Injected styles (moon button, tooltip)
+│   └── pink-noise-processor.js  # AudioWorklet for pink noise generation
 ├── popup/
 │   ├── popup.html         # Extension popup UI
 │   ├── popup.js           # Popup logic & settings management
@@ -52,7 +53,7 @@ AudioDestinationNode (speakers)
 
 **Parallel Pink Noise:**
 ```
-ScriptProcessor (Voss-McCartney pink noise)
+AudioWorklet (Voss-McCartney pink noise)
   ↓
 GainNode (comfort noise level)
   ↓
@@ -66,7 +67,7 @@ AudioDestinationNode
 - **DynamicsCompressorNode**: Suppresses sudden loud sounds (laughter, applause)
 - **BiquadFilterNode**: Low-pass filter for warmth (attenuates harsh highs)
 - **GainNode**: Volume control, fade effects, ad muting
-- **ScriptProcessor**: Pink noise generation (deprecated but still used)
+- **AudioWorklet**: Pink noise generation using Voss-McCartney algorithm
 
 ### Message Passing
 - `chrome.storage.local`: Persistent settings storage
@@ -78,7 +79,7 @@ AudioDestinationNode
 ```javascript
 {
   enabled: boolean,        // Master toggle
-  preset: 'deep' | 'relax' | null,
+  preset: 'deep' | 'zen' | 'relax' | string | null,  // Built-in or custom preset
   safety: 0-100,          // Compression aggressiveness
   warmth: 0-100,          // Low-pass filter frequency
   speed: 70-100,          // Playback rate (0.7x - 1.0x)
@@ -86,6 +87,13 @@ AudioDestinationNode
   adMute: boolean,        // Mute during ads
   comfortNoise: boolean,  // Pink noise during silence
   timerMinutes: number    // Sleep timer (0 = off)
+}
+
+// Custom presets stored separately:
+{
+  deepsleepCustomPresets: {
+    [name]: { safety, warmth, speed }
+  }
 }
 ```
 
@@ -133,11 +141,14 @@ Uses DOM observation for YouTube's ad indicators:
 Edit `PRESETS` object in [popup.js:13](popup/popup.js#L13):
 ```javascript
 const PRESETS = {
-  deep: { safety: 90, warmth: 85, speed: 85 },
-  relax: { safety: 70, warmth: 60, speed: 100 },
+  deep: { safety: 90, warmth: 85, speed: 90 },
+  zen: { safety: 80, warmth: 72, speed: 95 },
+  relax: { safety: 70, warmth: 60, speed: 100 }
   // Add new preset here
 };
 ```
+
+Users can also create custom presets via the popup UI, which are stored in `chrome.storage.local` under `deepsleepCustomPresets`.
 
 ### Debugging Audio Issues
 

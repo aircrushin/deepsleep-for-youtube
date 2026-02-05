@@ -17,6 +17,7 @@ const PRESETS = {
 };
 
 let settings = { ...DEFAULT_SETTINGS };
+let customPresets = {};
 
 // DOM Elements
 const masterToggle = document.getElementById('masterToggle');
@@ -37,14 +38,20 @@ const presetDeep = document.getElementById('presetDeep');
 const presetZen = document.getElementById('presetZen');
 const presetRelax = document.getElementById('presetRelax');
 const statsDisplay = document.getElementById('statsDisplay');
+const savePresetBtn = document.getElementById('savePresetBtn');
+const customPresetsList = document.getElementById('customPresetsList');
 
 // Load settings from storage
 async function loadSettings() {
-  const stored = await chrome.storage.local.get('deepsleepSettings');
+  const stored = await chrome.storage.local.get(['deepsleepSettings', 'deepsleepCustomPresets']);
   if (stored.deepsleepSettings) {
     settings = { ...DEFAULT_SETTINGS, ...stored.deepsleepSettings };
   }
+  if (stored.deepsleepCustomPresets) {
+    customPresets = stored.deepsleepCustomPresets;
+  }
   updateUI();
+  renderCustomPresets();
 }
 
 // Save settings to storage
@@ -112,7 +119,7 @@ function updateUI() {
 
 // Apply preset
 function applyPreset(presetName) {
-  const preset = PRESETS[presetName];
+  const preset = PRESETS[presetName] || customPresets[presetName];
   if (preset) {
     settings.preset = presetName;
     settings.safety = preset.safety;
@@ -120,6 +127,52 @@ function applyPreset(presetName) {
     settings.speed = preset.speed;
     saveSettings();
     updateUI();
+    renderCustomPresets();
+  }
+}
+
+// Save custom preset
+async function saveCustomPreset(name) {
+  customPresets[name] = {
+    safety: settings.safety,
+    warmth: settings.warmth,
+    speed: settings.speed
+  };
+  await chrome.storage.local.set({ deepsleepCustomPresets: customPresets });
+  settings.preset = name;
+  saveSettings();
+  renderCustomPresets();
+  updateUI();
+}
+
+// Delete custom preset
+async function deleteCustomPreset(name) {
+  delete customPresets[name];
+  await chrome.storage.local.set({ deepsleepCustomPresets: customPresets });
+  if (settings.preset === name) {
+    settings.preset = null;
+    saveSettings();
+    updateUI();
+  }
+  renderCustomPresets();
+}
+
+// Render custom presets list
+function renderCustomPresets() {
+  customPresetsList.innerHTML = '';
+  for (const [name, preset] of Object.entries(customPresets)) {
+    const item = document.createElement('div');
+    item.className = `custom-preset-item${settings.preset === name ? ' active' : ''}`;
+    item.innerHTML = `
+      <span class="preset-name">${name}</span>
+      <button class="delete-btn" title="Delete">×</button>
+    `;
+    item.querySelector('.preset-name').addEventListener('click', () => applyPreset(name));
+    item.querySelector('.delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteCustomPreset(name);
+    });
+    customPresetsList.appendChild(item);
   }
 }
 
@@ -137,6 +190,7 @@ safetySlider.addEventListener('input', () => {
   presetDeep.classList.remove('active');
   presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
+  renderCustomPresets();
 });
 
 safetySlider.addEventListener('change', saveSettings);
@@ -148,6 +202,7 @@ warmthSlider.addEventListener('input', () => {
   presetDeep.classList.remove('active');
   presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
+  renderCustomPresets();
 });
 
 warmthSlider.addEventListener('change', saveSettings);
@@ -159,6 +214,7 @@ speedSlider.addEventListener('input', () => {
   presetDeep.classList.remove('active');
   presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
+  renderCustomPresets();
 });
 
 speedSlider.addEventListener('change', saveSettings);
@@ -183,6 +239,13 @@ comfortNoiseCheckbox.addEventListener('change', () => {
 presetDeep.addEventListener('click', () => applyPreset('deep'));
 presetZen.addEventListener('click', () => applyPreset('zen'));
 presetRelax.addEventListener('click', () => applyPreset('relax'));
+
+savePresetBtn.addEventListener('click', () => {
+  const name = prompt('Enter preset name:');
+  if (name && name.trim()) {
+    saveCustomPreset(name.trim());
+  }
+});
 
 timerButtons.forEach(btn => {
   btn.addEventListener('click', () => {

@@ -127,6 +127,80 @@ body {
   font-weight: 500;
 }
 
+/* Custom Presets */
+.custom-presets {
+  margin-bottom: 16px;
+}
+
+.custom-presets-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #ccc;
+}
+
+.save-preset-btn {
+  padding: 4px 10px;
+  background: #1a1528;
+  border: 1px solid #4a3f6b;
+  border-radius: 4px;
+  color: #a78bfa;
+  font-size: 11px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.save-preset-btn:hover {
+  background: #2a2538;
+}
+
+.custom-presets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.custom-preset-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #111;
+  border: 1px solid #222;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #888;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.custom-preset-item:hover {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+.custom-preset-item.active {
+  background: #1a1528;
+  border-color: #4a3f6b;
+  color: #a78bfa;
+}
+
+.custom-preset-item .delete-btn {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.custom-preset-item .delete-btn:hover {
+  color: #f66;
+}
+
 /* Sliders */
 .sliders {
   display: flex;

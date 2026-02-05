@@ -34,10 +34,23 @@ An AI-enhanced auditory filter Chrome extension for YouTube, ensuring warm, inte
 
 ## Presets
 
+### Built-in Presets
+
 | Preset | Safety | Warmth | Speed |
 |--------|--------|--------|-------|
-| Deep Sleep | 90% | 85% | 0.85x |
-| Relax | 70% | 60% | 1.0x |
+| Deep Sleep | 90% | 85% | 0.90x |
+| Zen | 80% | 72% | 0.95x |
+| Relax | 70% | 60% | 1.00x |
+
+### Custom Presets
+
+You can save your own presets:
+1. Adjust the sliders to your preferred settings
+2. Click **"+ Save Current"** in the Custom Presets section
+3. Enter a name for your preset
+4. Your preset will be saved and available across sessions
+
+To delete a custom preset, click the **×** button next to it.
 
 ## Technical Details
 
