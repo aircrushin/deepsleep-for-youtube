@@ -101,7 +101,7 @@ class DeepSleepAudio {
     setInterval(checkForAds, 500);
   }
   
-  attachAudioProcessing() {
+  async attachAudioProcessing() {
     if (this.isProcessing || !this.videoElement) return;
     
     try {
@@ -110,7 +110,7 @@ class DeepSleepAudio {
       
       // Resume context if suspended (autoplay policy)
       if (this.audioContext.state === 'suspended') {
-        this.audioContext.resume();
+        await this.audioContext.resume();
       }
       
       // Create source from video element
@@ -129,15 +129,15 @@ class DeepSleepAudio {
       // Create Volume Gain node for dB volume control
       this.volumeGainNode = this.audioContext.createGain();
       
-      // Create pink noise for comfort noise
-      this.createPinkNoise();
-      
       // Connect the audio graph
       this.sourceNode.connect(this.compressorNode);
       this.compressorNode.connect(this.lowpassFilter);
       this.lowpassFilter.connect(this.gainNode);
       this.gainNode.connect(this.volumeGainNode);
       this.volumeGainNode.connect(this.audioContext.destination);
+      
+      // Create pink noise for comfort noise (async)
+      await this.createPinkNoise();
       
       // Mark as processing BEFORE applying settings
       this.isProcessing = true;
@@ -213,33 +213,24 @@ class DeepSleepAudio {
     }
   }
   
-  createPinkNoise() {
-    const bufferSize = 4096;
+  async createPinkNoise() {
     this.pinkNoiseGain = this.audioContext.createGain();
     this.pinkNoiseGain.gain.value = 0;
     
-    // Pink noise using Voss-McCartney algorithm
-    const scriptProcessor = this.audioContext.createScriptProcessor(bufferSize, 1, 1);
-    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-    
-    scriptProcessor.onaudioprocess = (e) => {
-      const output = e.outputBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        const white = Math.random() * 2 - 1;
-        b0 = 0.99886 * b0 + white * 0.0555179;
-        b1 = 0.99332 * b1 + white * 0.0750759;
-        b2 = 0.96900 * b2 + white * 0.1538520;
-        b3 = 0.86650 * b3 + white * 0.3104856;
-        b4 = 0.55000 * b4 + white * 0.5329522;
-        b5 = -0.7616 * b5 - white * 0.0168980;
-        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.05;
-        b6 = white * 0.115926;
-      }
-    };
-    
-    scriptProcessor.connect(this.pinkNoiseGain);
-    this.pinkNoiseGain.connect(this.audioContext.destination);
-    this.pinkNoiseNode = scriptProcessor;
+    try {
+      // Use AudioWorklet for pink noise generation
+      const workletUrl = chrome.runtime.getURL('content/pink-noise-processor.js');
+      await this.audioContext.audioWorklet.addModule(workletUrl);
+      
+      this.pinkNoiseNode = new AudioWorkletNode(this.audioContext, 'pink-noise-processor');
+      this.pinkNoiseNode.connect(this.pinkNoiseGain);
+      this.pinkNoiseGain.connect(this.audioContext.destination);
+      
+      console.log('DeepSleep: Pink noise AudioWorklet loaded');
+    } catch (e) {
+      console.warn('DeepSleep: AudioWorklet not supported, pink noise disabled', e);
+      this.pinkNoiseNode = null;
+    }
   }
   
   applyAudioParams() {

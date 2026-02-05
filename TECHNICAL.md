@@ -67,7 +67,7 @@ YouTube <video> 元素
 
         ┌───────────────────┐
         │  Pink Noise 生成器  │  ← 舒适噪音 (可选)
-        │  ScriptProcessor   │
+        │  AudioWorkletNode  │
         └───────────────────┘
 ```
 
@@ -141,23 +141,34 @@ this.videoElement.playbackRate = settings.speed / 100;  // 0.7 ~ 1.0
 
 **问题**: 视频中的静默间隙会产生"绝对寂静焦虑"
 
-**解决方案**: 使用 Voss-McCartney 算法生成粉红噪音
+**解决方案**: 使用 AudioWorklet + Voss-McCartney 算法生成粉红噪音
 
 ```javascript
-// 粉红噪音算法核心
-scriptProcessor.onaudioprocess = (e) => {
-  const output = e.outputBuffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    const white = Math.random() * 2 - 1;
-    b0 = 0.99886 * b0 + white * 0.0555179;
-    b1 = 0.99332 * b1 + white * 0.0750759;
-    // ... 更多滤波器级联
-    output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.05;
+// pink-noise-processor.js (AudioWorklet)
+class PinkNoiseProcessor extends AudioWorkletProcessor {
+  process(inputs, outputs, parameters) {
+    const output = outputs[0][0];
+    for (let i = 0; i < output.length; i++) {
+      const white = Math.random() * 2 - 1;
+      // Voss-McCartney 滤波器级联
+      this.b0 = 0.99886 * this.b0 + white * 0.0555179;
+      // ... 更多滤波器
+      output[i] = (this.b0 + ... + white * 0.5362) * 0.05;
+    }
+    return true;
   }
-};
+}
+registerProcessor('pink-noise-processor', PinkNoiseProcessor);
 ```
 
-粉红噪音特点: 低频能量更高,听感更自然舒适。
+```javascript
+// 加载 AudioWorklet
+const workletUrl = chrome.runtime.getURL('content/pink-noise-processor.js');
+await this.audioContext.audioWorklet.addModule(workletUrl);
+this.pinkNoiseNode = new AudioWorkletNode(ctx, 'pink-noise-processor');
+```
+
+**AudioWorklet 优势**: 在独立音频线程运行,不阻塞主线程,无废弃警告。
 
 ---
 
