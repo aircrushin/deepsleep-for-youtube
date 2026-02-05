@@ -80,7 +80,7 @@ function updateUI() {
   
   safetyValue.textContent = `${settings.safety}%`;
   warmthValue.textContent = `${settings.warmth}%`;
-  speedValue.textContent = `${(settings.speed / 100).toFixed(1)}x`;
+  speedValue.textContent = `${(settings.speed / 100).toFixed(2)}x`;
   
   volumeSlider.value = settings.volumeDb;
   volumeValue.textContent = `${settings.volumeDb > 0 ? '+' : ''}${settings.volumeDb} dB`;
@@ -155,7 +155,7 @@ warmthSlider.addEventListener('change', saveSettings);
 speedSlider.addEventListener('input', () => {
   settings.speed = parseInt(speedSlider.value);
   settings.preset = null;
-  speedValue.textContent = `${(settings.speed / 100).toFixed(1)}x`;
+  speedValue.textContent = `${(settings.speed / 100).toFixed(2)}x`;
   presetDeep.classList.remove('active');
   presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
