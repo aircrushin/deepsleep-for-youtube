@@ -1,0 +1,59 @@
+/* DeepSleep Tube - Injected Styles */
+
+.deepsleep-moon-btn {
+  position: relative;
+  font-size: 18px !important;
+  opacity: 0.9;
+  transition: opacity 0.2s, transform 0.2s;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 8px;
+}
+
+.deepsleep-moon-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.deepsleep-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: #a78bfa;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  margin-bottom: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.deepsleep-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Active pulse animation when processing */
+.deepsleep-moon-btn.active {
+  animation: deepsleep-pulse 2s infinite;
+}
+
+@keyframes deepsleep-pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}

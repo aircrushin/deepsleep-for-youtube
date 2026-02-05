@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=320">
+  <title>DeepSleep Tube</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <span class="moon-icon">🌙</span>
+        <h1>DeepSleep Tube</h1>
+      </div>
+      <label class="master-toggle">
+        <input type="checkbox" id="masterToggle">
+        <span class="toggle-slider"></span>
+      </label>
+    </header>
+
+    <section class="presets">
+      <button class="preset-btn" data-preset="deep" id="presetDeep">
+        <span class="preset-icon">😴</span>
+        <span class="preset-label">Deep Sleep</span>
+      </button>
+      <button class="preset-btn" data-preset="relax" id="presetRelax">
+        <span class="preset-icon">🧘</span>
+        <span class="preset-label">Relax</span>
+      </button>
+    </section>
+
+    <section class="sliders">
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>Safety (Anti-Shock)</label>
+          <span class="slider-value" id="safetyValue">70%</span>
+        </div>
+        <input type="range" id="safetySlider" min="0" max="100" value="70">
+        <p class="slider-desc">Suppresses sudden loud noises</p>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>Warmth (Filter)</label>
+          <span class="slider-value" id="warmthValue">60%</span>
+        </div>
+        <input type="range" id="warmthSlider" min="0" max="100" value="60">
+        <p class="slider-desc">Softens high frequencies</p>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>Speed (Pacing)</label>
+          <span class="slider-value" id="speedValue">1.0x</span>
+        </div>
+        <input type="range" id="speedSlider" min="70" max="100" value="100">
+        <p class="slider-desc">Slows down fast speech</p>
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>Volume (dB)</label>
+          <span class="slider-value" id="volumeValue">0 dB</span>
+        </div>
+        <input type="range" id="volumeSlider" min="-30" max="6" value="0">
+        <p class="slider-desc">Output volume level (-30dB to +6dB)</p>
+      </div>
+    </section>
+
+    <section class="extras">
+      <label class="checkbox-row">
+        <input type="checkbox" id="adMute" checked>
+        <span class="checkmark"></span>
+        <span>Mute Ads</span>
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" id="comfortNoise">
+        <span class="checkmark"></span>
+        <span>Comfort Noise (Pink)</span>
+      </label>
+    </section>
+
+    <section class="timer">
+      <div class="timer-header">
+        <span>Sleep Timer</span>
+        <span class="timer-display" id="timerDisplay">Off</span>
+      </div>
+      <div class="timer-buttons">
+        <button class="timer-btn" data-minutes="0">Off</button>
+        <button class="timer-btn" data-minutes="15">15m</button>
+        <button class="timer-btn" data-minutes="30">30m</button>
+        <button class="timer-btn" data-minutes="60">1h</button>
+        <button class="timer-btn" data-minutes="120">2h</button>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span class="stats" id="statsDisplay">Ready</span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
