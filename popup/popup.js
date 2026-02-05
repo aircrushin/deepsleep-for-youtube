@@ -56,10 +56,14 @@ async function sendSettingsToContent() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.id && tab.url?.includes('youtube.com')) {
-      chrome.tabs.sendMessage(tab.id, { type: 'SETTINGS_UPDATE', settings });
+      chrome.tabs.sendMessage(tab.id, { type: 'SETTINGS_UPDATE', settings }, () => {
+        if (chrome.runtime.lastError) {
+          // Content script not ready, ignore
+        }
+      });
     }
   } catch (e) {
-    console.log('Could not send to content script');
+    // Ignore errors
   }
 }
 
@@ -187,13 +191,17 @@ async function requestStats() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (tab?.id && tab.url?.includes('youtube.com')) {
       chrome.tabs.sendMessage(tab.id, { type: 'GET_STATS' }, (response) => {
+        if (chrome.runtime.lastError) {
+          // Content script not ready yet, ignore
+          return;
+        }
         if (response?.spikesSuppressed !== undefined) {
           statsDisplay.textContent = `${response.spikesSuppressed} spikes suppressed`;
         }
       });
     }
   } catch (e) {
-    console.log('Could not get stats');
+    // Ignore errors
   }
 }
 

@@ -154,20 +154,50 @@ class DeepSleepAudio {
     if (!this.isProcessing) return;
     
     try {
-      if (this.sourceNode) {
+      // Bypass: connect source directly to destination
+      if (this.sourceNode && this.audioContext) {
         this.sourceNode.disconnect();
         this.sourceNode.connect(this.audioContext.destination);
       }
       
-      if (this.pinkNoiseNode) {
-        this.pinkNoiseNode.stop();
-        this.pinkNoiseNode = null;
+      // Mute pink noise
+      if (this.pinkNoiseGain) {
+        this.pinkNoiseGain.gain.setValueAtTime(0, this.audioContext.currentTime);
+      }
+      
+      // Reset video playback rate
+      if (this.videoElement) {
+        this.videoElement.playbackRate = 1.0;
+      }
+      
+      // Remove moon icon
+      const moonBtn = document.getElementById('deepsleep-moon');
+      if (moonBtn) {
+        moonBtn.remove();
       }
       
       this.isProcessing = false;
       console.log('DeepSleep: Audio processing detached');
     } catch (e) {
       console.error('DeepSleep: Error detaching', e);
+    }
+  }
+  
+  reattachAudioProcessing() {
+    if (this.isProcessing || !this.sourceNode || !this.audioContext) return;
+    
+    try {
+      // Reconnect through processing chain
+      this.sourceNode.disconnect();
+      this.sourceNode.connect(this.compressorNode);
+      
+      this.isProcessing = true;
+      this.applySettings();
+      this.injectMoonIcon();
+      
+      console.log('DeepSleep: Audio processing reattached');
+    } catch (e) {
+      console.error('DeepSleep: Error reattaching', e);
     }
   }
   
@@ -241,7 +271,12 @@ class DeepSleepAudio {
     
     // Handle enable/disable
     if (this.settings.enabled && !this.isProcessing) {
-      this.attachAudioProcessing();
+      // Try reattach first (if nodes exist), otherwise full attach
+      if (this.sourceNode && this.compressorNode) {
+        this.reattachAudioProcessing();
+      } else {
+        this.attachAudioProcessing();
+      }
     } else if (!this.settings.enabled && this.isProcessing) {
       this.detachAudioProcessing();
     }
