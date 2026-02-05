@@ -11,7 +11,8 @@ const DEFAULT_SETTINGS = {
 };
 
 const PRESETS = {
-  deep: { safety: 90, warmth: 85, speed: 85 },
+  deep: { safety: 90, warmth: 85, speed: 90 },
+  zen: { safety: 80, warmth: 72, speed: 95 },
   relax: { safety: 70, warmth: 60, speed: 100 }
 };
 
@@ -33,6 +34,7 @@ const comfortNoiseCheckbox = document.getElementById('comfortNoise');
 const timerButtons = document.querySelectorAll('.timer-btn');
 const timerDisplay = document.getElementById('timerDisplay');
 const presetDeep = document.getElementById('presetDeep');
+const presetZen = document.getElementById('presetZen');
 const presetRelax = document.getElementById('presetRelax');
 const statsDisplay = document.getElementById('statsDisplay');
 
@@ -88,6 +90,7 @@ function updateUI() {
   
   // Presets
   presetDeep.classList.toggle('active', settings.preset === 'deep');
+  presetZen.classList.toggle('active', settings.preset === 'zen');
   presetRelax.classList.toggle('active', settings.preset === 'relax');
   
   // Timer
@@ -132,6 +135,7 @@ safetySlider.addEventListener('input', () => {
   settings.preset = null;
   safetyValue.textContent = `${settings.safety}%`;
   presetDeep.classList.remove('active');
+  presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
 });
 
@@ -142,6 +146,7 @@ warmthSlider.addEventListener('input', () => {
   settings.preset = null;
   warmthValue.textContent = `${settings.warmth}%`;
   presetDeep.classList.remove('active');
+  presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
 });
 
@@ -152,6 +157,7 @@ speedSlider.addEventListener('input', () => {
   settings.preset = null;
   speedValue.textContent = `${(settings.speed / 100).toFixed(1)}x`;
   presetDeep.classList.remove('active');
+  presetZen.classList.remove('active');
   presetRelax.classList.remove('active');
 });
 
@@ -175,6 +181,7 @@ comfortNoiseCheckbox.addEventListener('change', () => {
 });
 
 presetDeep.addEventListener('click', () => applyPreset('deep'));
+presetZen.addEventListener('click', () => applyPreset('zen'));
 presetRelax.addEventListener('click', () => applyPreset('relax'));
 
 timerButtons.forEach(btn => {
