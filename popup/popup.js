@@ -11,9 +11,9 @@ const DEFAULT_SETTINGS = {
 };
 
 const PRESETS = {
-  deep: { safety: 90, warmth: 85, speed: 90 },
-  zen: { safety: 80, warmth: 72, speed: 95 },
-  relax: { safety: 70, warmth: 60, speed: 100 }
+  deep: { safety: 90, warmth: 85, speed: 90, volumeDb: -4 },
+  zen: { safety: 80, warmth: 72, speed: 95, volumeDb: -2 },
+  relax: { safety: 70, warmth: 60, speed: 100, volumeDb: 0 }
 };
 
 let settings = { ...DEFAULT_SETTINGS };
@@ -125,6 +125,9 @@ function applyPreset(presetName) {
     settings.safety = preset.safety;
     settings.warmth = preset.warmth;
     settings.speed = preset.speed;
+    if (preset.volumeDb !== undefined) {
+      settings.volumeDb = preset.volumeDb;
+    }
     saveSettings();
     updateUI();
     renderCustomPresets();
